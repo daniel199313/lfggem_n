@@ -10,6 +10,7 @@ import clsx from "clsx";
 import { checkAddress } from "../../api";
 import { Abi__factory } from "../../web3/index";
 import { ethers } from "ethers";
+import Modal,{useModal,Loading,useLoading} from '../../components/modal'
 
 const displayAccount = (ac) => {
   return `${ac.substring(0, 7)} ...`;
@@ -22,6 +23,9 @@ const Main = () => {
   const [contract, setContract] = useState(null);
   const [status, setStatus] = useState(null);
   const [signature,setSignature] = useState('')
+  const {model,showMessage,close} = useModal()
+  const {show,loading,closeLoading} = useLoading()
+
   // 合约地址
   const Address = "0xe8c2d81c82bb768ca2dc4ada1c6407732b809966";
   const netChainId = import.meta.NODE_ENV == 'product' ? '0x1': '0x4'
@@ -56,28 +60,31 @@ const Main = () => {
   }, [provider]);
 
   const onMint = async (num=1) => {
+    if (!account) {
+      return showMessage('Please connect to your wallet')
+    }
+    if (notETH) {
+      return showMessage(netChainId == '0x1' ? 'Please switch to ETH Mainnet': 'Please switch to Rinkeby Test')
+    }
+
     if (status && contract) {
       if (status.soldout === true && signature === "0x") {
-        return alert("已售光");
+        return showMessage("Sold out");
       }
       if (status.soldout === true && signature !== "0x" && status.boosterMinted > status.boosterSupply) {
-        return alert('超过最大可mint数量')
+        return showMessage('超过最大可mint数量')
       }
       if (status.soldout === true && signature !== "0x" && status.boosterTimeout.toNumber() < Date.now()/1000) {
         console.log('boosterTimeout', status.boosterTimeout.toNumber())
-        return alert('超过白名单时间')
+        return showMessage('超过白名单时间')
       }      
      
-      try {
-        const signer =  provider.getSigner()
-       
-        // 链接合约
-        const c = Abi__factory.connect(Address,signer);        
+      try {   
         // 如果 已经mint大于 2 大于2的部分收费
         const value= status.userMinted + num > 2 ? status.price * (num+status.userMinted - 2): undefined //如果超过免费mint 需要付费
 
         // 调用mint
-        const mintRes = await c.mint(ethers.BigNumber.from(num), signature, {
+        const mintRes = await contract.mint(ethers.BigNumber.from(num), signature, {
           from: account,
           gasLimit: 720000,
           value
@@ -85,15 +92,24 @@ const Main = () => {
         // 等待N个区块
         await mintRes.wait(1)
         console.log(mintRes)
-        alert('mint 成功')
+        showMessage('Mint success')
       } catch (err) {
-        alert('mint 失败 ' + err.message)
+        if (err.code == 4001) {
+          showMessage('User denied transaction signature','Mint fail:')
+        } else {
+          showMessage('Please try again later','Mint fail:')
+        }
       }
     }
   };
 
   return (
     <div id="main" className="main relative">
+      {/* 弹窗 */}
+      <Modal show={model.show} title={model.title} onClose={()=>close()}>{model.children}</Modal>
+      <Loading show={show}/>
+
+
       <div className="absolute top-5 right-5 flex sm:flex-row flex-col-reverse items-end sm:items-center">
         <div className="flex mt-3 sm:mt-0">
           <button
@@ -113,7 +129,6 @@ const Main = () => {
         <Button
           className={clsx(
             "text-lg ml-6",
-            notETH ? "bg-red-200 text-red-700" : ""
           )}
           onClick={async () => {
             if (account) {
@@ -121,21 +136,13 @@ const Main = () => {
             }
             const provider = await connect([netChainId]);
             console.log(ethereum)
-            // const web3 = new Web3(provider);
-            // if (web3) {
-            //   connect();
-            // }
           }}
         >
           <BsWallet2
             className="inline-block mr-2"
             style={{ verticalAlign: "-3px" }}
           />
-          {!account
-            ? "Connet Wallet"
-            : notETH
-            ? "Switch to ETH"
-            : displayAccount(account)}
+          {!account? "Connet Wallet": displayAccount(account)}
         </Button>
       </div>
       <div className="fixed top-1/2 left-1/2 -translate-x-1/2 text-center text-blue-900 z-[1]">
@@ -148,7 +155,11 @@ const Main = () => {
               : "Let's mint"}
           </b>
         </h2>
-        <Button className="py-2 text-2xl sm:text-4xl" onClick={onMint}>
+        <Button className="py-2 text-2xl sm:text-4xl" onClick={async ()=>{
+          loading()
+          await onMint(1)
+          closeLoading()
+        }}>
           Mint your best NFT
         </Button>
       </div>
