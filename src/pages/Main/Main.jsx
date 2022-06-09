@@ -119,9 +119,9 @@ const Main = () => {
           >
             <FaFileContract size={26} />
           </button>
-          <button className="ml-4 w-6 hover:scale-125 transition-all">
+          <a href="https://twitter.com/LFG_GemNFT" target='_blank' className="block ml-4 w-6 hover:scale-125 transition-all">
             <img src={twitter} alt="twitter" />
-          </button>
+          </a>
           <button className="ml-4 w-6 hover:scale-125 transition-all">
             <img src={opensea} alt="opensea" />
           </button>
@@ -149,7 +149,7 @@ const Main = () => {
         <h2 className="text-2xl sm:text-4xl mb-5 ">
           <b>
             {!account
-              ? "Connet First"
+              ? "Connect First"
               : notETH
               ? "Switch to the correct network"
               : "Let's mint"}
