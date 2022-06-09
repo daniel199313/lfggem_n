@@ -35,7 +35,8 @@ const Main = () => {
       setNotEth(false);
       const p = new ethers.providers.Web3Provider(ethereum);
       setProvider(p);
-    }
+    } 
+    console.log('chainId',chainId)
   }, [account, chainId]);
 
   useEffect(async () => {

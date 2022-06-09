@@ -5,9 +5,9 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
-      '/api/gem/': {
-        target: "http://8.214.23.100:8800/"
-      }
+      // '/api/gem/': {
+      //   target: "http://8.214.23.100:8800/"
+      // }
     }
   }
 });
