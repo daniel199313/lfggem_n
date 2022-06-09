@@ -1,0 +1,24 @@
+@import url("https://fonts.googleapis.com/css2?family=Philosopher:wght@400;700&display=swap");
+
+:root {
+  font-size: 18px;
+}
+
+html,
+body {
+  font-family: "Philosopher", sans-serif;
+}
+
+.main {
+  background-image: url("../assets/images/pearlgirl_vertical.jpg");
+  background-size: cover;
+  background-position: center;
+
+  @media (min-width: 640px) {
+    background-image: url("../assets/images/lfggembanner.jpg");
+    // background-position: left;
+  }
+  /* background-position: left; */
+
+  min-height: calc(100vh + 200px);
+}
