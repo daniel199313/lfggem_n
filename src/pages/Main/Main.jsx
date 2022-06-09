@@ -11,6 +11,8 @@ import { checkAddress } from "../../api";
 import { Abi__factory } from "../../web3/index";
 import { ethers } from "ethers";
 import Modal,{useModal,Loading,useLoading} from '../../components/modal'
+import getConfig from '../../config'
+const cfg = getConfig()
 
 const displayAccount = (ac) => {
   return `${ac.substring(0, 7)} ...`;
@@ -26,9 +28,6 @@ const Main = () => {
   const {model,showMessage,close} = useModal()
   const {show,loading,closeLoading} = useLoading()
 
-  // 合约地址
-  const Address = "0xe8c2d81c82bb768ca2dc4ada1c6407732b809966";
-  const netChainId = import.meta.NODE_ENV == 'product' ? '0x1': '0x4'
 
   useEffect(async () => {
     if (account) {
@@ -36,7 +35,7 @@ const Main = () => {
       setSignature(res.data.data)
       console.log('res',res)
     }
-    if (chainId == netChainId) {
+    if (chainId == cfg.chainId) {
       setNotEth(false);
       const p = new ethers.providers.Web3Provider(ethereum);
       setProvider(p);
@@ -47,7 +46,7 @@ const Main = () => {
   useEffect(async () => {
     if (provider) {
       const signer =  provider.getSigner()
-      const c = Abi__factory.connect(Address,signer);
+      const c = Abi__factory.connect(cfg.contractAddress,signer);
       setContract(c);
       try {
         const _status = await c._status(account);
@@ -64,7 +63,7 @@ const Main = () => {
       return showMessage('Please connect to your wallet')
     }
     if (notETH) {
-      return showMessage(netChainId == '0x1' ? 'Please switch to ETH Mainnet': 'Please switch to Rinkeby Test')
+      return showMessage(cfg.chainId == '0x1' ? 'Please switch to ETH Mainnet': 'Please switch to Rinkeby Test')
     }
 
     if (status && contract) {
@@ -134,7 +133,7 @@ const Main = () => {
             if (account) {
               return;
             }
-            const provider = await connect([netChainId]);
+            const provider = await connect();
             console.log(ethereum)
           }}
         >
