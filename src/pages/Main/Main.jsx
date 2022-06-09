@@ -39,7 +39,9 @@ const Main = () => {
       setNotEth(false);
       const p = new ethers.providers.Web3Provider(ethereum);
       setProvider(p);
-    } 
+    } else {
+      setNotEth(true)
+    }
     console.log('chainId',chainId)
   }, [account, chainId]);
 
