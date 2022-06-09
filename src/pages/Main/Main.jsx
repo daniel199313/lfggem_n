@@ -24,6 +24,7 @@ const Main = () => {
   const [signature,setSignature] = useState('')
   // 合约地址
   const Address = "0xe8c2d81c82bb768ca2dc4ada1c6407732b809966";
+  const netChainId = import.meta.NODE_ENV == 'product' ? '0x1': '0x4'
 
   useEffect(async () => {
     if (account) {
@@ -31,7 +32,7 @@ const Main = () => {
       setSignature(res.data.data)
       console.log('res',res)
     }
-    if (chainId == "0x1" || chainId == "0x4") {
+    if (chainId == netChainId) {
       setNotEth(false);
       const p = new ethers.providers.Web3Provider(ethereum);
       setProvider(p);
@@ -54,7 +55,7 @@ const Main = () => {
     }
   }, [provider]);
 
-  const onMint = async () => {
+  const onMint = async (num=1) => {
     if (status && contract) {
       if (status.soldout === true && signature === "0x") {
         return alert("已售光");
@@ -72,10 +73,11 @@ const Main = () => {
        
         // 链接合约
         const c = Abi__factory.connect(Address,signer);        
-        const value= status.userMinted >= 2 ? status.price: undefined //如果超过免费mint 需要付费
+        // 如果 已经mint大于 2 大于2的部分收费
+        const value= status.userMinted + num > 2 ? status.price * (num+status.userMinted - 2): undefined //如果超过免费mint 需要付费
 
         // 调用mint
-        const mintRes = await c.mint(ethers.BigNumber.from(1), signature, {
+        const mintRes = await c.mint(ethers.BigNumber.from(num), signature, {
           from: account,
           gasLimit: 720000,
           value
@@ -117,8 +119,8 @@ const Main = () => {
             if (account) {
               return;
             }
-
-            const provider = await connect();
+            const provider = await connect([netChainId]);
+            console.log(ethereum)
             // const web3 = new Web3(provider);
             // if (web3) {
             //   connect();
