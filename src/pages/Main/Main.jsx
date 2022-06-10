@@ -157,7 +157,7 @@ const Main = () => {
             className="inline-block mr-2"
             style={{ verticalAlign: "-3px" }}
           />
-          {!account? "Connet Wallet": displayAccount(account)}
+          {!account? "Connect Wallet": displayAccount(account)}
         </Button>
       </div>
       <div className="fixed top-1/2 left-1/2 -translate-x-1/2 text-center text-blue-900 z-[1]">
