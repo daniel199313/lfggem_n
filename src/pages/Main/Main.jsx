@@ -23,7 +23,7 @@ const Main = () => {
   const [notETH, setNotEth] = useState(true);
   const [provider, setProvider] = useState(null);
   const [contract, setContract] = useState(null);
-  const [status, setStatus] = useState(null);
+  
   const [signature, setSignature] = useState('')
   const { model, showMessage, close } = useModal()
   const { show, loading, closeLoading } = useLoading()
@@ -52,14 +52,6 @@ const Main = () => {
       const c = Abi__factory.connect(cfg.contractAddress, signer);
 
       setContract(c);
-
-      try {
-        const _status = await c._status(account);
-        setStatus(_status);
-        console.log('status', _status)
-      } catch (err) {
-        console.error(err);
-      }
     }
   }, [provider]);
 
@@ -70,6 +62,14 @@ const Main = () => {
     if (notETH) {
       return showMessage(cfg.chainId == '0x1' ? 'Please switch to ETH Mainnet' : 'Please switch to Rinkeby Test')
     }
+
+    let status = null
+    try {
+      status = await contract._status(account);
+      console.log('status', status)
+    } catch (err) {
+      console.error(err);
+    }    
 
     if (status && contract) {
       if (status.soldout === true && signature === "0x") {
@@ -85,7 +85,7 @@ const Main = () => {
 
       try {
         // 如果 已经mint大于 2 大于2的部分收费
-        let payAmount;
+        let payAmount = 0;
         if (status.userMinted + num > status.walletFreeLimit) {
           payAmount = status.userMinted + num - status.walletFreeLimit;
           if (payAmount > num) payAmount = num;
@@ -183,7 +183,7 @@ const Main = () => {
         </Button>
         <div className="flex items-center mt-4">
           <p className=" drop-shadow-md">I want</p>
-          <input class={clsx("mx-3 shadow appearance-none border rounded w-20 py-2 px-3 text-center text-gray-700 leading-tight focus:outline-none focus:shadow-outline", isErrorAmount && 'border border-red-500')} id="amount" type="number" min={1} max={100} value={amount} onChange={(e) =>
+          <input className={clsx("mx-3 shadow appearance-none border rounded w-20 py-2 px-3 text-center text-gray-700 leading-tight focus:outline-none focus:shadow-outline", isErrorAmount && 'border border-red-500')} id="amount" type="number" min={1} max={100} value={amount} onChange={(e) =>
             setAmount(e.target.value)
           } />
         </div>
