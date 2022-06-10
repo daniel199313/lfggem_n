@@ -10,7 +10,7 @@ import clsx from "clsx";
 import { checkAddress } from "../../api";
 import { Abi__factory } from "../../web3/index";
 import { ethers } from "ethers";
-import Modal,{useModal,Loading,useLoading} from '../../components/modal'
+import Modal, { useModal, Loading, useLoading } from '../../components/modal'
 import getConfig from '../../config'
 const cfg = getConfig()
 
@@ -24,16 +24,17 @@ const Main = () => {
   const [provider, setProvider] = useState(null);
   const [contract, setContract] = useState(null);
   const [status, setStatus] = useState(null);
-  const [signature,setSignature] = useState('')
-  const {model,showMessage,close} = useModal()
-  const {show,loading,closeLoading} = useLoading()
+  const [signature, setSignature] = useState('')
+  const { model, showMessage, close } = useModal()
+  const { show, loading, closeLoading } = useLoading()
+  const [amount, setAmount] = useState(1)
 
 
   useEffect(async () => {
     if (account) {
       const res = await checkAddress(account);
       setSignature(res.data.data)
-      console.log('res',res)
+      console.log('res', res)
     }
     if (chainId == cfg.chainId) {
       setNotEth(false);
@@ -42,32 +43,32 @@ const Main = () => {
     } else {
       setNotEth(true)
     }
-    console.log('chainId',chainId)
+    console.log('chainId', chainId)
   }, [account, chainId]);
 
   useEffect(async () => {
     if (provider) {
-      const signer =  provider.getSigner()
-      const c = Abi__factory.connect(cfg.contractAddress,signer);
-      
+      const signer = provider.getSigner()
+      const c = Abi__factory.connect(cfg.contractAddress, signer);
+
       setContract(c);
-      
+
       try {
         const _status = await c._status(account);
         setStatus(_status);
-        console.log('status',_status)
+        console.log('status', _status)
       } catch (err) {
         console.error(err);
       }
     }
   }, [provider]);
 
-  const onMint = async (num=1) => {
+  const onMint = async (num = 1) => {
     if (!account) {
       return showMessage('Please connect to your wallet')
     }
     if (notETH) {
-      return showMessage(cfg.chainId == '0x1' ? 'Please switch to ETH Mainnet': 'Please switch to Rinkeby Test')
+      return showMessage(cfg.chainId == '0x1' ? 'Please switch to ETH Mainnet' : 'Please switch to Rinkeby Test')
     }
 
     if (status && contract) {
@@ -77,26 +78,26 @@ const Main = () => {
       if (status.soldout === true && signature !== "0x" && status.boosterMinted >= status.boosterSupply) {
         return showMessage('Sold out')
       }
-      if (status.soldout === true && signature !== "0x" && status.boosterTimeout.toNumber() < Date.now()/1000) {
+      if (status.soldout === true && signature !== "0x" && status.boosterTimeout.toNumber() < Date.now() / 1000) {
         console.log('boosterTimeout', status.boosterTimeout.toNumber())
         return showMessage('Sold out')
-      }      
-     
-      try {   
+      }
+
+      try {
         // 如果 已经mint大于 2 大于2的部分收费
         let payAmount;
         if (status.userMinted + num > status.walletFreeLimit) {
-            payAmount = status.userMinted + num - status.walletFreeLimit;
-            if (payAmount > num)  payAmount = num;
+          payAmount = status.userMinted + num - status.walletFreeLimit;
+          if (payAmount > num) payAmount = num;
         }
-        const value= payAmount * status.price //如果超过免费mint 需要付费
+        const value = payAmount * status.price //如果超过免费mint 需要付费
 
         // 调用mint
-        const gas = await contract.estimateGas.mint(ethers.BigNumber.from(num), signature,{
+        const gas = await contract.estimateGas.mint(ethers.BigNumber.from(num), signature, {
           from: account,
           value
         })
-        console.log('gas',gas.toNumber())
+        console.log('gas', gas.toNumber())
         const mintRes = await contract.mint(ethers.BigNumber.from(num), signature, {
           from: account,
           gasLimit: 720000,
@@ -109,9 +110,9 @@ const Main = () => {
         showMessage('Mint success')
       } catch (err) {
         if (err.code == 4001) {
-          showMessage('User denied transaction signature','Mint fail:')
+          showMessage('User denied transaction signature', 'Mint fail:')
         } else {
-          showMessage('Please try again later','Mint fail:')
+          showMessage('Please try again later', 'Mint fail:')
           console.log(err)
         }
       }
@@ -121,8 +122,8 @@ const Main = () => {
   return (
     <div id="main" className="main relative">
       {/* 弹窗 */}
-      <Modal show={model.show} title={model.title} onClose={()=>close()}>{model.children}</Modal>
-      <Loading show={show}/>
+      <Modal show={model.show} title={model.title} onClose={() => close()}>{model.children}</Modal>
+      <Loading show={show} />
 
 
       <div className="absolute top-5 right-5 flex sm:flex-row flex-col-reverse items-end sm:items-center">
@@ -157,30 +158,37 @@ const Main = () => {
             className="inline-block mr-2"
             style={{ verticalAlign: "-3px" }}
           />
-          {!account? "Connect Wallet": displayAccount(account)}
+          {!account ? "Connect Wallet" : displayAccount(account)}
         </Button>
       </div>
-      <div className="fixed top-1/2 left-1/2 -translate-x-1/2 text-center text-blue-900 z-[1]">
-        <h2 className="text-2xl sm:text-4xl mb-5 drop-shadow-md">
+      <div className="fixed top-[45%] left-1/2 -translate-x-1/2 text-center flex flex-col items-center text-blue-900 z-[1]">
+        <h2 className="text-2xl sm:text-4xl mb-4 drop-shadow-md">
           <b>
             {!account
               ? "Connect First"
               : notETH
-              ? "Switch to the correct network"
-              : "Let's mint"}
+                ? "Switch to the correct network"
+                : "Let's mint"}
           </b>
         </h2>
-        <Button className="py-2 text-2xl sm:text-4xl shadow-md" onClick={async ()=>{
+        <Button className="py-2 text-2xl sm:text-4xl shadow-md" onClick={async () => {
           loading()
-          await onMint(1)
+          await onMint(amount)
           closeLoading()
         }}>
           Mint your best NFT
         </Button>
+        <div className="flex items-center mt-4">
+          <p className=" drop-shadow-md">I want</p>
+          <input class={clsx("mx-3 shadow appearance-none border rounded w-20 py-2 px-3 text-center text-gray-700 leading-tight focus:outline-none focus:shadow-outline", amount > 100 && 'border border-red-500')} id="amount" type="number" value={amount} onChange={(e) =>
+            setAmount(e.target.value)
+          } />
+        </div>
+        {amount > 100 && <p className="text-sm text-red-500 drop-shadow-md">Cannout more than 100</p>}
       </div>
-      <div className="absolute top-5 sm:top-28 left-5 sm:left-auto right-auto sm:right-28 w-1/3 max-w-[400px]">
+      {/* <div className="absolute top-5 sm:top-28 left-5 sm:left-auto right-auto sm:right-28 w-1/3 max-w-[400px]">
         <img src={lgf} alt="lfggem" width="100%" />
-      </div>
+      </div> */}
       <p className="left-1/2 -translate-x-1/2 absolute bottom-3 text-center w-full">
         We believe in Art and Community. <b>TALK NO SHIT AND LFG</b>.
       </p>
