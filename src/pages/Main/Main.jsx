@@ -161,7 +161,7 @@ const Main = () => {
         </Button>
       </div>
       <div className="fixed top-1/2 left-1/2 -translate-x-1/2 text-center text-blue-900 z-[1]">
-        <h2 className="text-2xl sm:text-4xl mb-5 ">
+        <h2 className="text-2xl sm:text-4xl mb-5 drop-shadow-md">
           <b>
             {!account
               ? "Connect First"
@@ -170,7 +170,7 @@ const Main = () => {
               : "Let's mint"}
           </b>
         </h2>
-        <Button className="py-2 text-2xl sm:text-4xl" onClick={async ()=>{
+        <Button className="py-2 text-2xl sm:text-4xl shadow-md" onClick={async ()=>{
           loading()
           await onMint(1)
           closeLoading()
