@@ -184,7 +184,7 @@ const Main = () => {
             setAmount(e.target.value)
           } />
         </div>
-        {amount > 100 && <p className="text-sm text-red-500 drop-shadow-md">Cannout more than 100</p>}
+        {amount > 100 && <p className="text-sm text-red-500 drop-shadow-md">Cannot more than 100</p>}
       </div>
       {/* <div className="absolute top-5 sm:top-28 left-5 sm:left-auto right-auto sm:right-28 w-1/3 max-w-[400px]">
         <img src={lgf} alt="lfggem" width="100%" />
