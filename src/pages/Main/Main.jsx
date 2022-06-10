@@ -28,7 +28,7 @@ const Main = () => {
   const { model, showMessage, close } = useModal()
   const { show, loading, closeLoading } = useLoading()
   const [amount, setAmount] = useState(1)
-
+  const isErrorAmount = (amount > 100 || amount < 1)
 
   useEffect(async () => {
     if (account) {
@@ -172,6 +172,9 @@ const Main = () => {
           </b>
         </h2>
         <Button className="py-2 text-2xl sm:text-4xl shadow-md" onClick={async () => {
+          if (isErrorAmount) {
+            return
+          }
           loading()
           await onMint(amount)
           closeLoading()
@@ -180,11 +183,11 @@ const Main = () => {
         </Button>
         <div className="flex items-center mt-4">
           <p className=" drop-shadow-md">I want</p>
-          <input class={clsx("mx-3 shadow appearance-none border rounded w-20 py-2 px-3 text-center text-gray-700 leading-tight focus:outline-none focus:shadow-outline", amount > 100 || amount < 1 && 'border border-red-500')} id="amount" type="number" min={1} max={100} value={amount} onChange={(e) =>
+          <input class={clsx("mx-3 shadow appearance-none border rounded w-20 py-2 px-3 text-center text-gray-700 leading-tight focus:outline-none focus:shadow-outline", isErrorAmount && 'border border-red-500')} id="amount" type="number" min={1} max={100} value={amount} onChange={(e) =>
             setAmount(e.target.value)
           } />
         </div>
-        {amount > 100 || amount < 1 && <p className="text-sm text-red-500 drop-shadow-md">Wrong number</p>}
+        {isErrorAmount && <p className="text-sm text-red-500 drop-shadow-md">Amount between 1 - 100</p>}
       </div>
       {/* <div className="absolute top-5 sm:top-28 left-5 sm:left-auto right-auto sm:right-28 w-1/3 max-w-[400px]">
         <img src={lgf} alt="lfggem" width="100%" />
