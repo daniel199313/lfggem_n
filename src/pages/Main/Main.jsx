@@ -49,7 +49,9 @@ const Main = () => {
     if (provider) {
       const signer =  provider.getSigner()
       const c = Abi__factory.connect(cfg.contractAddress,signer);
+      
       setContract(c);
+      
       try {
         const _status = await c._status(account);
         setStatus(_status);
@@ -72,22 +74,33 @@ const Main = () => {
       if (status.soldout === true && signature === "0x") {
         return showMessage("Sold out");
       }
-      if (status.soldout === true && signature !== "0x" && status.boosterMinted > status.boosterSupply) {
-        return showMessage('超过最大可mint数量')
+      if (status.soldout === true && signature !== "0x" && status.boosterMinted >= status.boosterSupply) {
+        return showMessage('Sold out')
       }
       if (status.soldout === true && signature !== "0x" && status.boosterTimeout.toNumber() < Date.now()/1000) {
         console.log('boosterTimeout', status.boosterTimeout.toNumber())
-        return showMessage('超过白名单时间')
+        return showMessage('Sold out')
       }      
      
       try {   
         // 如果 已经mint大于 2 大于2的部分收费
-        const value= status.userMinted + num > 2 ? status.price * (num+status.userMinted - 2): undefined //如果超过免费mint 需要付费
+        let payAmount;
+        if (status.userMinted + num > status.walletFreeLimit) {
+            payAmount = status.userMinted + num - status.walletFreeLimit;
+            if (payAmount > num)  payAmount = num;
+        }
+        const value= payAmount * status.price //如果超过免费mint 需要付费
 
         // 调用mint
+        const gas = await contract.estimateGas.mint(ethers.BigNumber.from(num), signature,{
+          from: account,
+          value
+        })
+        console.log('gas',gas.toNumber())
         const mintRes = await contract.mint(ethers.BigNumber.from(num), signature, {
           from: account,
           gasLimit: 720000,
+          // gasPrice:gas,
           value
         });
         // 等待N个区块
@@ -99,6 +112,7 @@ const Main = () => {
           showMessage('User denied transaction signature','Mint fail:')
         } else {
           showMessage('Please try again later','Mint fail:')
+          console.log(err)
         }
       }
     }
