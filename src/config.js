@@ -11,5 +11,6 @@ const prod = {
 }
 
 export default ()=> {
+  console.log('mode',import.meta.env.MODE)
   return import.meta.env.MODE == 'development'? dev: prod
 }
