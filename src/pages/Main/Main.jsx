@@ -56,7 +56,7 @@ const Main = () => {
   }, [provider]);
 
   const onMint = async (num = 1) => {
-    num = number(num)
+    num = Number(num)
     if (!account) {
       return showMessage('Please connect to your wallet')
     }
