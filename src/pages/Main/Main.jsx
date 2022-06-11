@@ -91,7 +91,7 @@ const Main = () => {
           payAmount = status.userMinted + num - status.walletFreeLimit;
           if (payAmount > num) payAmount = num;
         }
-        const value = payAmount * status.price //如果超过免费mint 需要付费
+        const value = status.price.mul(payAmount) //如果超过免费mint 需要付费
 
         // 调用mint
         // const gas = await contract.estimateGas.mint(ethers.BigNumber.from(num), signature, {
