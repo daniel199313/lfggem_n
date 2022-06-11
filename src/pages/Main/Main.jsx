@@ -94,15 +94,14 @@ const Main = () => {
         const value = status.price.mul(payAmount) //如果超过免费mint 需要付费
 
         // 调用mint
-        // const gas = await contract.estimateGas.mint(ethers.BigNumber.from(num), signature, {
-        //   from: account,
-        //   value
-        // })
-        // console.log('gas', gas.toNumber())
+        const gas = await contract.estimateGas.mint(ethers.BigNumber.from(num), signature, {
+          from: account,
+          value
+        })
+        console.log('gas', gas.toNumber())
         const mintRes = await contract.mint(ethers.BigNumber.from(num), signature, {
           from: account,
-          gasLimit: 720000,
-          // gasPrice:gas,
+          gasPrice:gas,
           value
         });
         // 等待N个区块
