@@ -23,7 +23,7 @@ const Main = () => {
   const [notETH, setNotEth] = useState(true);
   const [provider, setProvider] = useState(null);
   const [contract, setContract] = useState(null);
-
+  
   const [signature, setSignature] = useState('0x')
   const { model, showMessage, close } = useModal()
   const { show, loading, closeLoading } = useLoading()
@@ -70,7 +70,7 @@ const Main = () => {
       console.log('status', status)
     } catch (err) {
       console.error(err);
-    }
+    }    
 
     if (status && contract) {
       if (status.soldout === true && signature === "0x") {
@@ -94,14 +94,14 @@ const Main = () => {
         const value = status.price.mul(payAmount) //如果超过免费mint 需要付费
 
         // 调用mint
-        const gas = await contract.estimateGas.mint(ethers.BigNumber.from(num), signature, {
-          from: account,
-          value
-        })
+        // const gas = await contract.estimateGas.mint(ethers.BigNumber.from(num), signature, {
+        //   from: account,
+        //   value
+        // })
         console.log('gas', gas.toNumber())
         const mintRes = await contract.mint(ethers.BigNumber.from(num), signature, {
           from: account,
-          gasPrice:gas,
+          gasLimit: 100000,
           value
         });
         // 等待N个区块
@@ -128,16 +128,19 @@ const Main = () => {
 
       <div className="absolute top-5 right-5 flex sm:flex-row flex-col-reverse items-end sm:items-center">
         <div className="flex mt-3 sm:mt-0">
-          <a href="https://etherscan.io/address/0x7350b11e511695f51d8182aa899f6e6aa59061fc" target="_blank"
-            className="block ml-4 text-cyan-700 hover:scale-125 transition-all">
+          <button
+            className={clsx(
+              "ml-4 text-cyan-700 hover:scale-125 transition-all"
+            )}
+          >
             <FaFileContract size={26} />
-          </a>
+          </button>
           <a href="https://twitter.com/LFG_GemNFT" target='_blank' className="block ml-4 w-6 hover:scale-125 transition-all">
             <img src={twitter} alt="twitter" />
           </a>
-          <a href="https://opensea.io/collection/lfg-gem" target="_blank" className="block ml-4 w-6 hover:scale-125 transition-all">
+          <button className="ml-4 w-6 hover:scale-125 transition-all">
             <img src={opensea} alt="opensea" />
-          </a>
+          </button>
         </div>
         <Button
           className={clsx(
