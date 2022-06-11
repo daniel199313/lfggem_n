@@ -7,7 +7,7 @@ import { BsWallet2, BsTwitter } from "react-icons/bs";
 import { FaFileContract } from "react-icons/fa";
 import { useMetaMask } from "metamask-react";
 import clsx from "clsx";
-import { checkAddress } from "../../api";
+// import { checkAddress } from "../../api";
 import { Abi__factory } from "../../web3/index";
 import { ethers } from "ethers";
 import Modal, { useModal, Loading, useLoading } from '../../components/modal'
@@ -24,18 +24,18 @@ const Main = () => {
   const [provider, setProvider] = useState(null);
   const [contract, setContract] = useState(null);
   
-  const [signature, setSignature] = useState('')
+  const [signature, setSignature] = useState('0x')
   const { model, showMessage, close } = useModal()
   const { show, loading, closeLoading } = useLoading()
   const [amount, setAmount] = useState(1)
   const isErrorAmount = (amount > 100 || amount < 1)
 
   useEffect(async () => {
-    if (account) {
-      const res = await checkAddress(account);
-      setSignature(res.data.data)
-      console.log('res', res)
-    }
+    // if (account) {
+    //   // const res = await checkAddress(account);
+    //   setSignature(res.data.data)
+    //   console.log('res', res)
+    // }
     if (chainId == cfg.chainId) {
       setNotEth(false);
       const p = new ethers.providers.Web3Provider(ethereum);
